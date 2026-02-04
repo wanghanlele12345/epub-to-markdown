@@ -335,14 +335,29 @@ def cleanup_pandoc_artifacts(content):
 
     content = re.sub(pattern2, repl2, content)
 
-    # Pattern 3: Remove Pandoc Divs (::: ...)
+    # Pattern 3: Remove attributes from images ![...](...){...}
+    # Matches: ![alt](url){.class width=...} -> ![alt](url)
+    pattern3 = r'!\[(.*?)\]\((.*?)\)\{.*?\}'
+    content = re.sub(pattern3, r'![\1](\2)', content)
+
+    # Pattern 4: Remove generic span attributes [text]{...}
+    # Matches: [text]{.class} -> text
+    # Note: We use a lookahead to ensure we don't match links [text](url)
+    # But since { immediately follows ], it distinguishes from (url)
+    pattern4 = r'(?<!\!)\[(.*?)\]\{.*?\}'
+    content = re.sub(pattern4, r'\1', content)
+
+    # Pattern 5: Remove Pandoc Divs (::: ...)
     # Matches lines starting with :::
     content = re.sub(r'^:::.*?$', '', content, flags=re.MULTILINE)
 
-    # Pattern 4: Remove Header Attributes {#...}
+    # Pattern 6: Remove Header Attributes {#...}
     # Matches: # Title {#id .class} -> # Title
     # We look for {#...} at the end of a header line
     content = re.sub(r'^(#+.*)\s+\{#[^}]+\}\s*$', r'\1', content, flags=re.MULTILINE)
+    
+    # Global cleanup of common Pandoc escapes that are unnecessary in Obsidian
+    content = content.replace(r'\[', '[').replace(r'\]', ']').replace(r'\"', '"')
     
     return content
 
