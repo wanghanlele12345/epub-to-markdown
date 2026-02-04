@@ -302,11 +302,13 @@ def append_footnotes(section_content, full_content):
         
     return section_content
 
-def cleanup_pandoc_footnotes(content):
+def cleanup_pandoc_artifacts(content):
     """
-    Cleans up Pandoc's superscript/attribute artifacts for footnotes.
+    Cleans up Pandoc's artifacts to make Markdown Obsidian-friendly.
     1. Converts inline ^[text](url){#id}^ to <sup id="id"><a href="#url">text</a></sup>
     2. Converts definition lines [text](url){#id} to <a href="url" id="id">text</a>
+    3. Removes Pandoc Div fences (::: ...)
+    4. Removes Header Attributes ({#id ...})
     """
     # Pattern 1: Inline footnotes ^[...](...){...}^
     pattern1 = r'\^\[(.*?)\]\((.*?)\)\{#([a-zA-Z0-9_.-]+).*?\}\^'
@@ -322,8 +324,6 @@ def cleanup_pandoc_footnotes(content):
     content = re.sub(pattern1, repl1, content)
 
     # Pattern 2: Link definitions with attributes [...](...){...}
-    # Matches: [text](url){#id ...}
-    # This cleans up the definition lines usually found at the bottom or in references
     pattern2 = r'\[(.*?)\]\((.*?)\)\{#([a-zA-Z0-9_.-]+).*?\}'
 
     def repl2(match):
@@ -334,6 +334,15 @@ def cleanup_pandoc_footnotes(content):
         return f'<a href="{url}" id="{ref_id}">{clean_text}</a>'
 
     content = re.sub(pattern2, repl2, content)
+
+    # Pattern 3: Remove Pandoc Divs (::: ...)
+    # Matches lines starting with :::
+    content = re.sub(r'^:::.*?$', '', content, flags=re.MULTILINE)
+
+    # Pattern 4: Remove Header Attributes {#...}
+    # Matches: # Title {#id .class} -> # Title
+    # We look for {#...} at the end of a header line
+    content = re.sub(r'^(#+.*)\s+\{#[^}]+\}\s*$', r'\1', content, flags=re.MULTILINE)
     
     return content
 
@@ -380,8 +389,8 @@ def convert_toc_item(item, output_base, index, epub_root, root_output_dir):
         rel_path = os.path.relpath(root_output_dir, file_dir)
         final_content = fix_media_links(final_content, rel_path)
         
-        # Cleanup Pandoc footnote artifacts
-        final_content = cleanup_pandoc_footnotes(final_content)
+        # Cleanup Pandoc artifacts (footnotes, divs, headers)
+        final_content = cleanup_pandoc_artifacts(final_content)
             
         if final_content.strip():
             with open(output_path, 'w', encoding='utf-8') as f:
