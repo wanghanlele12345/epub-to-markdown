@@ -1,79 +1,80 @@
-# Epub & PDF to Markdown Converter
+# Epub & PDF 转 Markdown 转换器
 
-This project provides a robust solution for converting EPUB and PDF files into structured Markdown documents. It is designed to preserve the structure of the original document as much as possible, splitting content into separate files based on the Table of Contents (TOC) or Headers.
+本项目提供了一个强大的解决方案，用于将 EPUB 和 PDF 文件转换为结构化的 Markdown 文档。它的设计初衷是尽可能保留原始文档的结构，根据目录（TOC）或标题将内容拆分到独立的文件中。
 
-[中文文档](README_zh-CN.md)
+[English README](README_en.md)
 
-## Key Features
+## 主要功能
 
-*   **EPUB Conversion**:
-    *   **TOC-Based Splitting**: intelligently parses the EPUB's Table of Contents (NCX or Nav) to create a matching directory structure.
-    *   **Nested Structure**: Preserves hierarchy (e.g., `Part 1/Chapter 1.md`).
-    *   **Smart Media Handling**: Extracts all images to a centralized `media/` folder and automatically fixes relative links in the Markdown files to point to the correct location.
-    *   **Anchor Slicing**: Uses Pandoc to convert the full text but then slices it precisely based on internal anchors, avoiding content duplication across chapters.
-    *   **Fallback Mechanism**: If no TOC is found, falls back to the linear "Spine" structure of the EPUB.
+*   **EPUB 转换**：
+    *   **基于目录拆分**：智能解析 EPUB 的目录（NCX 或 Nav），创建对应的文件夹结构。
+    *   **保留层级**：完美保留书籍的层级关系（例如：`第一部/第一章.md`）。
+    *   **智能图片管理**：将所有图片提取到统一的 `media/` 文件夹，并自动修复 Markdown 文件中的相对链接，确保图片正常显示。
+    *   **锚点精准切割**：使用 Pandoc 转换全文，然后根据内部锚点进行精准切割，避免章节间内容重复。
+    *   **降级机制**：如果未找到目录，会自动降级使用 EPUB 的线性“Spine”结构进行拆分。
 
-*   **PDF Conversion**:
-    *   Uses `marker` (a powerful PDF-to-Markdown engine) for high-quality conversion.
-    *   **Header Splitting**: Automatically splits the resulting large Markdown file into smaller files based on H1 (`#`) and H2 (`##`) headers.
+*   **PDF 转换**：
+    *   使用 `marker`（一个强大的 PDF 转 Markdown 引擎）进行高质量转换。
+    *   **标题拆分**：自动根据一级标题（`#`）和二级标题（`##`）将生成的长 Markdown 文件拆分为多个小文件。
 
-*   **macOS Integration**:
-    *   Includes a script ready to be used with macOS Automator for "Right Click -> Convert" functionality.
+*   **macOS 集成**：
+    *   包含一个脚本，可直接用于 macOS Automator，实现“右键 -> 转换为 Markdown”的快捷功能。
 
-## Requirements
+## 依赖要求
 
 *   **Python 3.x**
-*   **Pandoc**: Required for EPUB conversion.
-    *   Install via Homebrew: `brew install pandoc`
-*   **Marker** (Optional, for PDF support):
-    *   See [Marker installation instructions](https://github.com/VikParuchuri/marker).
+*   **Pandoc**：EPUB 转换必须。
+    *   通过 Homebrew 安装：`brew install pandoc`
+*   **Marker**（可选，仅 PDF 转换需要）：
+    *   请参阅 [Marker 安装说明](https://github.com/VikParuchuri/marker)。
 
-## Installation
+## 安装
 
-1.  Clone this repository:
+1.  克隆本仓库：
     ```bash
     git clone https://github.com/wanghanlele12345/epub-to-markdown.git
     cd epub-to-markdown
     ```
 
-2.  Ensure you have the required dependencies (Pandoc, Python).
+2.  确保您已安装所需的依赖（Pandoc, Python）。
 
-## Usage
+## 使用方法
 
-### Command Line
+### 命令行
 
-You can run the conversion script directly on one or more files:
+您可以直接对一个或多个文件运行转换脚本：
 
 ```bash
 ./convert.sh book.epub document.pdf
 ```
 
-*   **For EPUB**: Creates a folder named `book_toc_split/` containing the structured markdown.
-*   **For PDF**: Creates a folder named `document_md/` with the raw output and a `_split/` subfolder with the split content.
+*   **EPUB 文件**：会创建一个名为 `book_toc_split/` 的文件夹，其中包含结构化的 Markdown 内容。
+*   **PDF 文件**：会创建一个名为 `document_md/` 的文件夹，包含原始输出以及一个 `_split/` 子文件夹，里面是拆分后的内容。
 
-### macOS Context Menu (Quick Action)
+### macOS 右键菜单（快速操作）
 
-To add this as a right-click action on macOS:
+要在 macOS 上添加右键快捷操作：
 
-1.  Open **Automator**.
-2.  Create a new **Quick Action**.
-3.  Set "Workflow receives current" to **files or folders** in **Finder**.
-4.  Add a **Run Shell Script** action.
-5.  Set "Pass input" to **as arguments**.
-6.  Paste the logic from `convert.sh` or simply call the script:
+1.  打开 **Automator**（自动操作）。
+2.  新建一个 **Quick Action**（快速操作）。
+3.  将“工作流程接收当前”设置为 **访达（Finder）** 中的 **文件或文件夹**。
+4.  添加 **Run Shell Script**（运行 Shell 脚本）操作。
+5.  将“传递输入”设置为 **作为自变量**（as arguments）。
+6.  粘贴 `convert.sh` 中的逻辑，或者直接调用该脚本：
     ```bash
     /path/to/epub-to-markdown/convert.sh "$@"
     ```
-7.  Save as "Convert to Markdown".
+    *(请将 `/path/to/` 替换为您实际存放该项目的路径)*
+7.  保存为 "Convert to Markdown"。
 
-Now you can right-click any EPUB or PDF file and select **Quick Actions > Convert to Markdown**.
+现在，您可以右键点击任何 EPUB 或 PDF 文件，选择 **快速操作 > Convert to Markdown** 即可开始转换。
 
-## Project Structure
+## 项目结构
 
-*   `epub_to_md.py`: The core Python script for handling EPUB parsing, Pandoc conversion, content slicing, and media management.
-*   `split_markdown.py`: A helper Python script to split flat Markdown files (used for PDF output) based on headers.
-*   `convert.sh`: The main shell script that acts as an entry point, detecting file types and calling the appropriate Python converter.
+*   `epub_to_md.py`: 核心 Python 脚本，负责 EPUB 解析、Pandoc 转换、内容切割和媒体资源管理。
+*   `split_markdown.py`: 辅助 Python 脚本，用于根据标题拆分扁平的 Markdown 文件（主要用于 PDF 输出）。
+*   `convert.sh`: 主 Shell 脚本，作为入口点，负责检测文件类型并调用相应的 Python 转换器。
 
-## License
+## 许可证
 
-MIT License. Feel free to use and modify.
+MIT License. 欢迎使用和修改。
