@@ -1,0 +1,6 @@
+*.epub
+*_toc_split/
+*_md/
+.DS_Store
+*.log
+__pycache__/
