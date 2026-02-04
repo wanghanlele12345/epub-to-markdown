@@ -2,6 +2,8 @@
 
 This project provides a robust solution for converting EPUB and PDF files into structured Markdown documents. It is designed to preserve the structure of the original document as much as possible, splitting content into separate files based on the Table of Contents (TOC) or Headers.
 
+[中文文档](README_zh-CN.md)
+
 ## Key Features
 
 *   **EPUB Conversion**:
